@@ -4,6 +4,7 @@
 // Wardriver firmware source - https://github.com/Sil333033/flipperzero-wardriver
 // AirTag Scanner firmware source - https://github.com/MatthewKuKanich/ESP32-AirTag-Scanner
 // Black Magic firmware source - https://github.com/flipperdevices/blackmagic-esp32-s2
+// Ghost ESP firmware source - https://github.com/Spooks4576/Ghost_ESP
 
 // DO NOT use as an example, you should split into different scene files for each screen
 // To keep in a single file, this is setup in an unusual and confusing way
@@ -38,6 +39,8 @@ enum QuickState {
     QuickS3_Marauder,
     QuickS3_Wardriver,
     QuickS3_Airtag,
+    QuickS2Boot_GhostESP,
+    QuickS2_GhostESP,
 };
 
 void esp_flasher_scene_quick_submenu_callback(void* context, uint32_t index) {
@@ -93,6 +96,33 @@ void esp_flasher_scene_quick_on_enter(void* context) {
     case QuickS2Boot_Marauder:
     case QuickS2Boot_Wardriver:
     case QuickS2Boot_Blackmagic:
+    case QuickS2_GhostESP: // Added
+            submenu_set_header(submenu, "Choose Firmware:");
+            submenu_add_item(
+                submenu,
+                "Marauder (has Evil Portal)",
+                state > QuickS2 ? QuickS2_Marauder : QuickS2Boot_Marauder,
+                esp_flasher_scene_quick_submenu_callback,
+                app);
+            submenu_add_item(
+                submenu,
+                "Wardriver",
+                state > QuickS2 ? QuickS2_Wardriver : QuickS2Boot_Wardriver,
+                esp_flasher_scene_quick_submenu_callback,
+                app);
+            submenu_add_item(
+                submenu,
+                "Black Magic",
+                state > QuickS2 ? QuickS2_Blackmagic : QuickS2Boot_Blackmagic,
+                esp_flasher_scene_quick_submenu_callback,
+                app);
+            submenu_add_item(
+                submenu,
+                "Ghost ESP", // Added
+                state > QuickS2 ? QuickS2_GhostESP : QuickS2Boot_GhostESP,
+                esp_flasher_scene_quick_submenu_callback,
+                app);
+            break;
     case QuickS2_Marauder:
     case QuickS2_Wardriver:
     case QuickS2_Blackmagic:
@@ -229,6 +259,15 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
             boot = APP_DATA_PATH("assets/blackmagic/s2/bootloader.bin");
             part = APP_DATA_PATH("assets/blackmagic/s2/partition-table.bin");
             firm = APP_DATA_PATH("assets/blackmagic/s2/blackmagic.bin");
+            break;
+
+        case QuickS2Boot_GhostESP:
+            enter_bootloader = true;
+			/* fallthrough */
+		case QuickS2_GhostESP:
+		            boot = APP_DATA_PATH("assets/ghostESP/s2/bootloader.bin");
+		            part = APP_DATA_PATH("assets/ghostESP/partitions.bin");
+		            firm = APP_DATA_PATH("assets/ghostESP/s2/firmware.bin");
             break;
 
         case QuickWROOMBoot_Marauder:
